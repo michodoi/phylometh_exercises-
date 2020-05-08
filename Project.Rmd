@@ -3,13 +3,23 @@ title: "Final Project"
 author: "Michelle"
 date: "5/8/2020"
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+#SYNOPSIS
+#This project involves a using mitochondrial sequence data from 14 species of PRIMATES.
+#896 nucleotides were collected by a number of researchers in Japan and 14 species data was selected by Masami
+Hasegawa
+# D-loop noncoding region and third positions of adjacent coding sequences was selected to get a site that is close to having no rate variation.
+
+#Objective was to used:
+#Align and convert the data
+#Estimating tress from distance matrices using neighbor-joining and UPGMA
+#Compute maximum Likelihood and bootstrapping
 
 ```{r}
 setwd("~/phylometh_exercises-")
@@ -23,7 +33,8 @@ library(seqinr)
 ```
 
 #Alignment and Conversion of data
-#Interleaved:the function starts to read the sequences after it finds one or more spaces (or tabulations). All #characters before the sequences are taken as the taxa names after removing the leading and trailing spaces (so #spaces in taxa names are not allowed). It is assumed that the taxa names are not repeated in the subsequent #blocks of nucleotides.
+#Interleaved:the function starts to read the sequences after it finds one or more spaces (or tabulations). All characters before the sequences are taken as the taxa names after removing the leading and trailing spaces (so spaces in taxa names are not allowed). 
+#It is assumed that the taxa names are not repeated in the subsequent blocks of nucleotides.
 ```{r}
 mammals <- read.dna("~/phylometh_exercises-/primates.dna", format="interleaved")
 mammals_phyDat <- phyDat(mammals, type = "DNA", levels = NULL)
@@ -59,7 +70,7 @@ plot(mammals_NJ, main = "Neighbor Joining")
 ```
 
 #Parsimony can be used to fit the data of the trees and compare their respective parisimony scores
-#optim.parismony() gives you a detailed search through the nearest-neighbor interchange (NNI) and subtree pruning #and regrafting (SPR).
+#optim.parismony() gives you a detailed search through the nearest-neighbor interchange (NNI), subtree pruning and regrafting (SPR).
 #pratchet() will perform the search with the parsimony ratchet algorithm.
 ```{r}
 parsimony(mammals_UPGMA, mammals10_phyDat)
