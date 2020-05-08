@@ -1,0 +1,106 @@
+---
+title: "Final Project"
+author: "Michelle"
+date: "5/8/2020"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+setwd("~/phylometh_exercises-")
+```
+
+#loading Library
+```{r}
+library(ape)
+library(phangorn)
+library(seqinr)
+```
+
+#Alignment and Conversion of data
+#Interleaved:the function starts to read the sequences after it finds one or more spaces (or tabulations). All #characters before the sequences are taken as the taxa names after removing the leading and trailing spaces (so #spaces in taxa names are not allowed). It is assumed that the taxa names are not repeated in the subsequent #blocks of nucleotides.
+```{r}
+mammals <- read.dna("~/phylometh_exercises-/primates.dna", format="interleaved")
+mammals_phyDat <- phyDat(mammals, type = "DNA", levels = NULL)
+
+# Subset (first ten)
+mammals10 <- subset(mammals_phyDat, 1:10)
+mammals10_phyDat <- phyDat(mammals10, type = "DNA", levels = NULL)
+```
+
+#Comparing  different nucleotide or amino acid substitution models
+```{r, eval=TRUE}
+mt <- modelTest(mammals10)
+print (mt)
+```
+
+```{r}
+dna_dist <- dist.ml(mammals10, model="JC69")
+```
+
+#Estimating tress from distance matrices using neighbor-joining and UPGMA(Unweighted Pair Group Method with #Arithmetic mean) algorithms.
+#UPGMA is a simple agglomerative hierarchical clustering method
+```{r}
+mammals_UPGMA <- upgma(dna_dist)
+mammals_NJ  <- NJ(dna_dist)
+plot(mammals_UPGMA, main="UPGMA")
+```
+
+#ploting Neighnor joining
+#Neighnor joining is a bottom-up (agglomerative) clustering method for the creation of phylogenetic trees
+#Bottom-up (agglomerative) is a type of hierachical clustering where each observation starts in its own cluster, and pairs of clusters are merged as one moves up the hierarchy
+```{r}
+plot(mammals_NJ, main = "Neighbor Joining")
+```
+
+#Parsimony can be used to fit the data of the trees and compare their respective parisimony scores
+#optim.parismony() gives you a detailed search through the nearest-neighbor interchange (NNI) and subtree pruning #and regrafting (SPR).
+#pratchet() will perform the search with the parsimony ratchet algorithm.
+```{r}
+parsimony(mammals_UPGMA, mammals10_phyDat)
+parsimony(mammals_NJ, mammals10_phyDat)
+mammals_optim <- optim.parsimony(mammals_NJ, mammals10_phyDat)
+mammals_pratchet <- pratchet(mammals10)
+```
+
+#plot mammals_optim and mammals_pratchet 
+```{r}
+plot(mammals_optim)
+plot(mammals_pratchet)
+```
+
+#Maximum Likelihood and Bootstrapping
+#These are more computationally intensive methods than the distance matrix method
+#Maximum Likelihood helps you to estimate model parameters by align all your sequenced data in a statistical frame work.
+#pml() can beb used to compute likelihood of a given tree.
+#To optimize the tree topology and branch length for a selected model of nucleotide evolution, the function optim.pml() can be used
+```{r}
+fit <- pml(mammals_NJ, mammals10)
+print(fit)
+```
+
+```{r}
+fitJC <- optim.pml(fit, model = "JC", rearrangement = "stochastic")
+```
+
+```{r}
+logLik(fitJC)
+```
+
+```{r}
+bs <- bootstrap.pml(fitJC, bs=100, optNni=TRUE, multicore=TRUE, control = pml.control(trace=0))
+plotBS(midpoint(fitJC$tree), bs, p = 50, type="p")
+```
+
+#Exporting Trees
+#write.tree () allows you to export the output in Newick format
+```{r}
+write.tree(bs, file="bootstrap_example.tre")
+```
+
+
